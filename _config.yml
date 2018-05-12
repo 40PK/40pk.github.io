@@ -78,4 +78,6 @@ theme: icarus
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
-  type:
+  type: git
+  repo: https://__GITHUB_TOKEN__@github.com/40PK/40pk.github.io.git
+  branch: master
