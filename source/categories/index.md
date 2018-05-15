@@ -1,3 +1,3 @@
 title: "Категории"
-layout: "categories"
+layout: "Categories"
 ---
