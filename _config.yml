@@ -75,6 +75,15 @@ pagination_dir: page
 ## Themes: https://hexo.io/themes/
 theme: icarus
 
+feed:
+  type: rss2
+  path: rss.xml
+  limit: 20
+  hub:
+  content:
+  content_limit: 140
+  content_limit_delim: ' '
+
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
