@@ -18,6 +18,7 @@
     "hexo-generator-tag": "^0.2.0",
     "hexo-generator-feed": "^1.2.2",
     "hexo-generator-seo-friendly-sitemap": "^0.0.21",
+    "hexo-generator-robotstxt": "^0.2.0",
     "hexo-renderer-ejs": "^0.3.0",
     "hexo-renderer-marked": "^0.3.0",
     "hexo-renderer-stylus": "^0.3.1",

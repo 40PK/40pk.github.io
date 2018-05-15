@@ -86,6 +86,11 @@ sitemap:
   path: sitemap.xml
   tag: false
   category: false
+robotstxt:
+  useragent: "*"
+  #disallow:
+  #allow:
+  sitemap: /sitemap.xml
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
