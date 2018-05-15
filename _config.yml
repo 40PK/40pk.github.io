@@ -74,7 +74,6 @@ pagination_dir: page
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
 theme: icarus
-
 feed:
   type: rss2
   path: rss.xml
@@ -83,6 +82,10 @@ feed:
   content:
   content_limit: 140
   content_limit_delim: ' '
+sitemap:
+  path: sitemap.xml
+  tag: false
+  category: false
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
