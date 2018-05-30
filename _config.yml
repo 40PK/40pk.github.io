@@ -88,7 +88,10 @@ sitemap:
   category: false
 robotstxt:
   useragent: "*"
-  #disallow:
+  disallow: 
+    - /archives
+    - /categories
+    - /tags
   #allow:
   sitemap: https://40pk.github.io/sitemap.xml
 
