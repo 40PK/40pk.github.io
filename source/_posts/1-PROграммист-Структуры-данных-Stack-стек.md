@@ -1,11 +1,12 @@
 ---
-title: 1. PROграммист. Структуры данных - Stack (стек)
+title: 1.1. PROграммист. Структуры данных - Stack (стек)
 date: 2018-08-07 11:33:58
 tags:
   - PROграммист
   - JavaScript
   - Структуры данных
   - Stack
+  - Стек
 categories:
   - Статьи
 banner: /images/PROgrammer-Stack_banner.png
