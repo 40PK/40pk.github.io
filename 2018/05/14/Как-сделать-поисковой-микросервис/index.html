@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang=ru>
+<head>
+    <meta charset="utf-8">
+    
+    <title>Как сделать поисковой микросервис | 40PK Channel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="Поиск является неотъемлемой частью любого приложения и возможность найти что-либо через строку поиска. Есть много способов сделать это, я видел как это сделано на стороне клиента с помощью цикла, или">
+<meta name="keywords" content="Перевод,API,Golang,Микросервис,Elasticsearch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Как сделать поисковой микросервис">
+<meta property="og:url" content="http://40pk.github.io/2018/05/14/Как-сделать-поисковой-микросервис/index.html">
+<meta property="og:site_name" content="40PK Channel">
+<meta property="og:description" content="Поиск является неотъемлемой частью любого приложения и возможность найти что-либо через строку поиска. Есть много способов сделать это, я видел как это сделано на стороне клиента с помощью цикла, или">
+<meta property="og:locale" content="ru">
+<meta property="og:image" content="http://40pk.github.io/images/howmakesearvhmicroservice.jpg">
+<meta property="og:updated_time" content="2018-08-14T11:23:58.492Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Как сделать поисковой микросервис">
+<meta name="twitter:description" content="Поиск является неотъемлемой частью любого приложения и возможность найти что-либо через строку поиска. Есть много способов сделать это, я видел как это сделано на стороне клиента с помощью цикла, или">
+<meta name="twitter:image" content="http://40pk.github.io/images/howmakesearvhmicroservice.jpg">
+    
+
+    
+        <link rel="alternate" href="/rss.xml" title="40PK Channel" type="application/atom+xml" />
+    
+
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+        <link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+    
+    
+        <link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+    
+    
+        <script type="text/javascript">
+(function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-81643761-3', 'auto');
+ga('send', 'pageview');
+
+</script>
+    
+    
+        <meta name="google-site-verification" content="googleb1d6f304f5107bbd" />
+    
+    
+
+
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-1824040022361243",
+    enable_page_level_ads: true
+  });
+</script>
+<meta name="yandex-verification" content="829ef4ff0f7e45da" />
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">40PK Channel</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">Домой</a>
+                
+                    <a class="main-nav-link" href="/archives">Архив</a>
+                
+                    <a class="main-nav-link" href="/categories">Категории</a>
+                
+                    <a class="main-nav-link" href="/tags">Теги</a>
+                
+                    <a class="main-nav-link" href="/info">Инфо</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/avatar.jpg" />
+                            <i class="fa fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Поиск" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Введите что-нибудь..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'посты',
+            PAGES: 'страницы',
+            CATEGORIES: 'категории',
+            TAGS: 'теги',
+            UNTITLED: '(Без названия)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">Домой</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">Архив</a></td>
+                
+                    <td><a class="main-nav-link" href="/categories">Категории</a></td>
+                
+                    <td><a class="main-nav-link" href="/tags">Теги</a></td>
+                
+                    <td><a class="main-nav-link" href="/info">Инфо</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Поиск" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile" class="profile-fixed">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/avatar.jpg" />
+            <h2 id="name">40PK Channel</h2>
+            <h3 id="title">Подборка интересных материалов из мира программирования.</h3>
+            <span id="location"><i class="fa fa-map-marker"></i>Санкт-Петербург, Россия</span>
+            <a id="follow" target="_blank" href="https://github.com/40pk/">Подписаться</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                7
+                <span>посты</span>
+            </div>
+            <div class="article-info-block">
+                25
+                <span>теги</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="http://github.com/40pk" target="_blank" title="github" class=tooltip>
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="https://twitter.com/fortypk" target="_blank" title="twitter" class=tooltip>
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="/rss.xml" target="_blank" title="rss" class=tooltip>
+                            <i class="fa fa-rss"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-Как-сделать-поисковой-микросервис" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+            
+	
+		<img src="/images/howmakesearvhmicroservice.jpg" class="article-banner" />
+	
+
+
+
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            Как сделать поисковой микросервис
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2018/05/14/Как-сделать-поисковой-микросервис/">
+            <time datetime="2018-05-14T19:50:57.000Z" itemprop="datePublished">2018-05-14</time>
+        </a>
+    </div>
+
+
+                        
+    <div class="article-category">
+    	<i class="fa fa-folder"></i>
+        <a class="article-category-link" href="/categories/Статьи/">Статьи</a>
+    </div>
+
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/API/">API</a>, <a class="tag-link" href="/tags/Elasticsearch/">Elasticsearch</a>, <a class="tag-link" href="/tags/Golang/">Golang</a>, <a class="tag-link" href="/tags/Микросервис/">Микросервис</a>, <a class="tag-link" href="/tags/Перевод/">Перевод</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <p>Поиск является неотъемлемой частью любого приложения и возможность найти что-либо через строку поиска. Есть много способов сделать это, я видел как это сделано на стороне клиента с помощью цикла, или же с полнотекстовой индексацией в Postgres или MySQL. Но наступает ситуация, где нам нужен отдельный поисковой сервис, и для этого часто выбирают Elasticsearch.<br><a id="more"></a><br>В этой статье я покажу как сделать простой поисковой микросервис, используя язык программирования Golang. Мы будем искать пользователей по электронной почте, никнейму и настоящему имени. Все исходники вы можете найти на GitHub.</p>
+<h3 id="Архитектура"><a href="#Архитектура" class="headerlink" title="Архитектура"></a>Архитектура</h3><p>Прежде чем начать писать код давайте разберемся как это должно работать.</p>
+<p>Важно понимать, что Elasticsearch не должен подвергаться прямому воздействию клиента, поэтому создание промежуточного микросервиса имеет важное значение.</p>
+<p>В этом примере для микросервиса потребуется один endpoint для поиска. Также нам надо заполнить кеш Elasticsearch’а, поэтому нам понадобится второй endpoint. В реальном приложении лучше использовать какую-то очередь для набора Producer  и Consumer (подробнее об этом описано здесь), чтобы заполнить систему. Однако мы не будем к этому прибегать в этой статье.</p>
+<p>Мы будем использовать в качестве двух endpoint’ов следующее:</p>
+<ul>
+<li><code>/search</code></li>
+<li><code>/populate</code></li>
+</ul>
+<p>Эти endpoint’ы будут получать параметры.</p>
+<h3 id="Поиск"><a href="#Поиск" class="headerlink" title="Поиск"></a>Поиск</h3><p>Поисковой endpoint должен получать два параметра, во-первых, нам нужно указать строку, которую будем искать. Также нам нужна простейшая пагинация, чтобы указать сколько результатов поиска вернуть и сколько нужно результатов проигнорировать в начале поиска.</p>
+<ul>
+<li>q - строка для поискового запроса</li>
+<li>from - начальный индекс в списке результатов</li>
+<li>size - количество результатов для возвращения</li>
+</ul>
+<h3 id="Заполнение"><a href="#Заполнение" class="headerlink" title="Заполнение"></a>Заполнение</h3><p>Заполняющий endpoint получает только один параметр, который используется для определения количества результатов для генерирования. </p>
+<ul>
+<li>number - количество результатов для вставки в Elasticsearch </li>
+</ul>
+<h3 id="Endpoint’ы"><a href="#Endpoint’ы" class="headerlink" title="Endpoint’ы"></a>Endpoint’ы</h3><p>Теперь, когда мы знаем структуру нашего микросервиса и какие endpoint’ы и параметры нам нужны, давайте начнем с писать код!</p>
+<p>Во-первых, сначала создадим главный файл <code>main.go</code> с endpoint’ами и базовым HTTP-сервером.</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"log"</span></span><br><span class="line">    <span class="string">"net/http"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    mux := http.NewServeMux()</span><br><span class="line"></span><br><span class="line">    mux.HandleFunc(<span class="string">"/populate"</span>, <span class="function"><span class="keyword">func</span><span class="params">(w http.ResponseWriter, req *http.Request)</span></span> &#123;</span><br><span class="line">        </span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    mux.HandleFunc(<span class="string">"/search"</span>, <span class="function"><span class="keyword">func</span><span class="params">(w http.ResponseWriter, req *http.Request)</span></span> &#123;</span><br><span class="line"></span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    log.Fatal(http.ListenAndServe(<span class="string">":8000"</span>, mux))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Поскольку это достаточно маленький микросервис, мы создадим endpoint’ы непосредственно в файле <code>main.go</code>. Но в продакшн или если у вас больше логики, лучше перенести эти endpoint’ы в отдельный файлы.</p>
+<p>Теперь, давайте напишем поисковой endpoint.</p>
+<p>Нам нужно будет получить <code>get</code> параметры, что относительно неуклюже и долго, когда вы используете стандартную библиотеку Golang, поэтому я не буду описывать это в статье, если вам интересно, то метод описан на <a href="https://github.com/rymccue/search-microservice-demo/blob/master/main.go#L10" target="_blank" rel="noopener">GitHub</a>.</p>
+<p>После получения параметров мы проверяем, правильны ли они, если нет, то отправляем ответ, что это недопустимый запрос. После этого мы передаем параметры <code>term</code>, <code>from</code> и <code>size</code> в нашу функцию поиска в Elasticsearch, которую мы создадим в следующем разделе. Функция будет опрашивать Elasticsearch и возвращать результаты, а также ошибку, если таковая случится. Оттуда мы будем формировать json ответ и отправлять его клиенту. Довольно просто.</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">mux.HandleFunc(<span class="string">"/search"</span>, <span class="function"><span class="keyword">func</span><span class="params">(w http.ResponseWriter, req *http.Request)</span></span> &#123;</span><br><span class="line">    term, from, size, ok := getQueryParams(req)</span><br><span class="line">    <span class="keyword">if</span> !ok &#123;</span><br><span class="line">        w.WriteHeader(http.StatusBadRequest)</span><br><span class="line">        w.Write([]<span class="keyword">byte</span>(<span class="string">"Attach proper parameters"</span>))</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    res, err := Search(term, from, size)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        w.WriteHeader(http.StatusInternalServerError)</span><br><span class="line">        w.Write([]<span class="keyword">byte</span>(<span class="string">"Error searching"</span>))</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    w.WriteHeader(http.StatusOK)</span><br><span class="line">    json.NewEncoder(w).Encode(res)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>Следующая задача - создать endpoint для заполнения Elasticsearch. Наличие endpoint’а поиска не имеет смысла, если у нас нет данных для поиска!</p>
+<p>Первое, что мы делаем, это получить get параметр <code>number</code> и переобразовать его в целое число. Если он неправильный, мы возвращаем отрицательный ответ клиенту. Следующий шаг - заполнить Elasticsearch, это делается с помощью вспомогательной функции, которую мы сделаем позже в этой статье. Наконец, мы возвращаем ошибку, если функция заполнения отдает ошибку.</p>
+ <figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">mux.HandleFunc(<span class="string">"/populate"</span>, <span class="function"><span class="keyword">func</span><span class="params">(w http.ResponseWriter, req *http.Request)</span></span> &#123;</span><br><span class="line">    numberArr, ok := req.URL.Query()[<span class="string">"number"</span>]</span><br><span class="line">    <span class="keyword">if</span> !ok &#123;</span><br><span class="line">        w.WriteHeader(http.StatusBadRequest)</span><br><span class="line">        w.Write([]<span class="keyword">byte</span>(<span class="string">"Attach proper parameters"</span>))</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    numberStr := numberArr[<span class="number">0</span>]</span><br><span class="line">    number, err := strconv.Atoi(numberStr)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        w.WriteHeader(http.StatusBadRequest)</span><br><span class="line">        w.Write([]<span class="keyword">byte</span>(<span class="string">"Attach proper parameters"</span>))</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    err = Populate(number)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> || !ok &#123;</span><br><span class="line">        w.WriteHeader(http.StatusBadRequest)</span><br><span class="line">        w.Write([]<span class="keyword">byte</span>(err.Error()))</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>Теперь, когда мы создали endpoint’ы, нам нужно связать все это вместе с функциями Elasticsearch.</p>
+<h3 id="Elasticsearch-Helpers"><a href="#Elasticsearch-Helpers" class="headerlink" title="Elasticsearch Helpers"></a>Elasticsearch Helpers</h3><p>Последняя часть создания микросервиса это подключение к Elasticsearch. Давайте создадим helper’ы сейчас, мы сделаем это в новом файле <code>elastic.go</code>.</p>
+<p>Давайте посмотрим, как должен выглядеть файл, сначала нам нужна json-модель для Elasticsearch. Вам нужно создать структуру пользователя <code>User</code> со следующими полями:</p>
+<ul>
+<li><code>Username</code> с json-декоратором <code>username</code></li>
+<li><code>Email</code> с json-декоратором <code>email</code></li>
+<li><code>RealName</code> с json-декоратором <code>real_name</code></li>
+</ul>
+<p>Нам также необходимо создать функции <code>Populate</code> и <code>Search</code>.</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"context"</span></span><br><span class="line">    <span class="string">"github.com/olivere/elastic"</span></span><br><span class="line">    <span class="string">"github.com/icrowley/fake"</span></span><br><span class="line">    <span class="string">"encoding/json"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> User <span class="keyword">struct</span> &#123;</span><br><span class="line">    Username <span class="keyword">string</span> <span class="string">`json:"username"`</span></span><br><span class="line">    Email    <span class="keyword">string</span> <span class="string">`json:"email"`</span></span><br><span class="line">    RealName <span class="keyword">string</span> <span class="string">`json:"real_name"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Populate</span><span class="params">(number <span class="keyword">int</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Search</span><span class="params">(term <span class="keyword">string</span>, from, size <span class="keyword">int</span>)</span> <span class="params">([]*User, error)</span></span> &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Теперь, когда мы написали макет, следующий шаг - создать методы. Мы используем <a href="https://github.com/olivere/elastic" target="_blank" rel="noopener">github.com/olivere/elastic</a> для работы с Elasticsearch.</p>
+<p>Теперь создадим логику для функции поиска. Первый шаг это соединиться к поиску Elastic и мы сделаем это создав новый клиент. Если соединение прошло успешно мы формируем запрос. Мы используем многопоточный запрос, если вам интересны другие параметры вы можете найти их в <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/full-text-queries.html" target="_blank" rel="noopener">документации</a> Elasticsearch.</p>
+<p>Наконец, мы вызываем метод <code>Search</code> и передаём корректные параметры, используем индекс пользователя, и передаём ранее созданный многопоточный запрос и добавляем пагинацию.</p>
+<p>В ответ мы получим много довольно интересной информации, но для нашего микросервиса мы не занимаемся журналированием или аналитикой, поэтому нас интересуют только результаты поиска. Мы проходимся циклом по результатам и используем <code>json.Unmarshal</code>, чтобы добавить пользователей в нашу структуру и затем добавляем структуру в массив, чтобы передать клиенту.</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Search</span><span class="params">(term <span class="keyword">string</span>, from, size <span class="keyword">int</span>)</span> <span class="params">([]*User, error)</span></span> &#123;</span><br><span class="line">    client, err := elastic.NewClient(elastic.SetURL(<span class="string">"http://elasticsearch:9200"</span>))</span><br><span class="line">    <span class="keyword">if</span> err != err &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">    &#125;</span><br><span class="line">    q := elastic.NewMultiMatchQuery(term, <span class="string">"username"</span>, <span class="string">"email"</span>, <span class="string">"real_name"</span>).Fuzziness(<span class="string">"AUTO:2,5"</span>)</span><br><span class="line">    res, err := client.Search().</span><br><span class="line">        Index(<span class="string">"users"</span>).</span><br><span class="line">        Query(q).</span><br><span class="line">        From(from).</span><br><span class="line">        Size(size).</span><br><span class="line">        Do(context.Background())</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">    &#125;</span><br><span class="line">    users := <span class="built_in">make</span>([]*User, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> _, hit := <span class="keyword">range</span> res.Hits.Hits &#123;</span><br><span class="line">        <span class="keyword">var</span> user User</span><br><span class="line">        err := json.Unmarshal(*hit.Source, &amp;user)</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">        &#125;</span><br><span class="line">        users = <span class="built_in">append</span>(users, &amp;user)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> users, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Функция <code>Populate</code> начинается почти также, нам нужно подключится к клиенту. Но мы проверяем, существует ли индекс, и если нет, то создаем его. Затем мы используем <a href="https://github.com/icrowley/fake" target="_blank" rel="noopener">библиотеку</a> для генерации фальшивых пользователей, генерируем и передаем их в функцию, и вставляем в Elasticsearch.</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Populate</span><span class="params">(number <span class="keyword">int</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    client, err := elastic.NewClient(elastic.SetURL(<span class="string">"http://elasticsearch:9200"</span>))</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> err</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    idxExists, err := client.IndexExists(<span class="string">"users"</span>).Do(context.Background())</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> !idxExists &#123;</span><br><span class="line">        client.CreateIndex(<span class="string">"users"</span>).Do(context.Background())</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; number; i++ &#123;</span><br><span class="line">        user := User&#123;</span><br><span class="line">            Username: fake.UserName(),</span><br><span class="line">            Email: fake.EmailAddress(),</span><br><span class="line">            RealName: fake.FullName(),</span><br><span class="line">        &#125;</span><br><span class="line">        _, err = client.Index().</span><br><span class="line">            Index(<span class="string">"users"</span>).</span><br><span class="line">            Type(<span class="string">"doc"</span>).</span><br><span class="line">            BodyJson(user).</span><br><span class="line">            Do(context.Background())</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> err</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Настраиваем-Docker"><a href="#Настраиваем-Docker" class="headerlink" title="Настраиваем Docker"></a>Настраиваем Docker</h3><p>Для этой системы я выбираю docker-compose, чтобы связать поисковый микросервис с Elasticsearch. В <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html" target="_blank" rel="noopener">документации</a> Elasticsearch есть отличная статья по этому поводу. Я последовал за этой статьей с несколькими небольшими изменениями. Единственная часть, на которой нам нужно сосредоточиться, - это Dockerfile, а также привязка его к Elasticsearch через docker-compose.</p>
+<p> Dockerfile довольно простой, мы загружаем docker образ <code>Golang 1.10 alpine</code>, добавляем <code>dep</code> для нашего менеджера зависимостей, добавляем путь к коду в <code>GOPATH</code>, получаем зависимости с <code>dep</code>, компилируем программу и запускаем ее.</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> golang:<span class="number">1.10</span>-alpine</span><br><span class="line"></span><br><span class="line"><span class="keyword">LABEL</span> authors="Ryan McCue &lt;ryan@msys.ca&gt;"</span><br><span class="line"></span><br><span class="line">RUN apk add --no-cache ca-certificates openssl git</span><br><span class="line">RUN wget -O /usr/local/bin/dep https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64 &amp;&amp; \</span><br><span class="line">  chmod +x /usr/local/bin/dep</span><br><span class="line"></span><br><span class="line">RUN mkdir /go/src/app</span><br><span class="line"></span><br><span class="line">ADD . /go/src/app/</span><br><span class="line"></span><br><span class="line">WORKDIR /go/src/app</span><br><span class="line"></span><br><span class="line">RUN dep ensure</span><br><span class="line"></span><br><span class="line">RUN go build -o main .</span><br><span class="line"></span><br><span class="line">CMD ["/go/src/app/main"]</span><br></pre></td></tr></table></figure>
+<p>Файл <code>docker-compose.yml</code> стандартный, он основан на <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html" target="_blank" rel="noopener">этом</a> с добавлением службы поиска и добавлением в <code>esnet</code>.</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="string">'2.2'</span></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line"><span class="attr">  search:</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">search</span></span><br><span class="line"><span class="attr">    build:</span></span><br><span class="line"><span class="attr">      context:</span> <span class="string">.</span></span><br><span class="line"><span class="attr">      dockerfile:</span> <span class="string">./Dockerfile</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./search:/www</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"8080:8000"</span></span><br><span class="line"><span class="attr">    networks:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">esnet</span></span><br><span class="line"><span class="attr">  elasticsearch:</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">docker.elastic.co/elasticsearch/elasticsearch:6.2.4</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">elasticsearch</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">cluster.name=docker-cluster</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">bootstrap.memory_lock=true</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"ES_JAVA_OPTS=-Xms512m -Xmx512m"</span></span><br><span class="line"><span class="attr">    ulimits:</span></span><br><span class="line"><span class="attr">      memlock:</span></span><br><span class="line"><span class="attr">        soft:</span> <span class="bullet">-1</span></span><br><span class="line"><span class="attr">        hard:</span> <span class="bullet">-1</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="attr">      - esdata1:</span><span class="string">/usr/share/elasticsearch/data</span></span><br><span class="line"><span class="attr">    networks:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">wsdnet</span></span><br><span class="line"><span class="attr">    healthcheck:</span></span><br><span class="line"><span class="attr">      test:</span> <span class="string">"curl -f http://localhost:9200 || exit 1"</span></span><br><span class="line"><span class="attr">      interval:</span> <span class="number">1</span><span class="string">s</span></span><br><span class="line"><span class="attr">      retries:</span> <span class="number">20</span></span><br><span class="line"><span class="attr">    networks:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">esnet</span></span><br><span class="line"><span class="attr">  elasticsearch2:</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">docker.elastic.co/elasticsearch/elasticsearch:6.2.4</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">elasticsearch2</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">cluster.name=docker-cluster</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">bootstrap.memory_lock=true</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"ES_JAVA_OPTS=-Xms512m -Xmx512m"</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"discovery.zen.ping.unicast.hosts=elasticsearch"</span></span><br><span class="line"><span class="attr">    ulimits:</span></span><br><span class="line"><span class="attr">      memlock:</span></span><br><span class="line"><span class="attr">        soft:</span> <span class="bullet">-1</span></span><br><span class="line"><span class="attr">        hard:</span> <span class="bullet">-1</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="attr">      - esdata2:</span><span class="string">/usr/share/elasticsearch/data</span></span><br><span class="line"><span class="attr">    networks:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">esnet</span></span><br><span class="line"></span><br><span class="line"><span class="attr">volumes:</span></span><br><span class="line"><span class="attr">  esdata1:</span></span><br><span class="line"><span class="attr">    driver:</span> <span class="string">local</span></span><br><span class="line"><span class="attr">  esdata2:</span></span><br><span class="line"><span class="attr">    driver:</span> <span class="string">local</span></span><br><span class="line"></span><br><span class="line"><span class="attr">networks:</span></span><br><span class="line"><span class="attr">  esnet:</span></span><br></pre></td></tr></table></figure>
+<p>Чтобы проверить и убедиться, что файлы работают вместе, как и планировалось, выполните <code>docker-compose build</code> для построения поискового микросервиса, а затем запустите <code>docker-compose up</code> для запуска кода. Elasticsearch будет собран в <code>docker-compose up</code>, поэтому не беспокойтесь, если вы заметите это.</p>
+<h3 id="Запуск"><a href="#Запуск" class="headerlink" title="Запуск!"></a>Запуск!</h3><p>Теперь, когда микросервис написан и взаимодействует с Elasticsearch, пришло время проверить его. Давайте запустим наши endpoint’ы и посмотрим, что произойдет! Во-первых, мы должны заполнить Elasticsearch результатами, поэтому давайте запустим endpoint <code>/populate</code>. Вы можете запустить его с помощью ссылки ниже:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:8080/populate?number=100</span><br></pre></td></tr></table></figure></p>
+<p>После заполнения следующий шаг - поиск результатов. Поскольку мы используем Faker, имена не известны заранее, поэтому вам, возможно, придется попробовать пару имен, прежде чем вы увидите результаты. Вы можете запустить поисковой endpoint с помощью ссылки ниже:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:8080/search?q=ryan&amp;from=0&amp;size=20</span><br></pre></td></tr></table></figure></p>
+<h3 id="Заключение"><a href="#Заключение" class="headerlink" title="Заключение"></a>Заключение</h3><p>Эта статья показывает как можно легко сделать микросервис для таких сервисов, как поиск, и подключить его для работы с Elasticsearch. В реальной системе вы не будете генерировать случайные данные, вы, вероятно, будете использовать webhooks или системы очередей для заполнения поиска.</p>
+<p>Источник: <a href="https://ryanmccue.ca/how-to-create-a-search-microservice/" target="_blank" rel="noopener">ryanmccue</a></p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://40pk.github.io/2018/05/14/Как-сделать-поисковой-микросервис/" data-id="cjktme50u000dzrjxv6nnvbf4" class="article-share-link"><i class="fa fa-share"></i>Поделиться</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+        <a href="http://40pk.github.io/2018/05/14/Как-сделать-поисковой-микросервис/#comments" class="article-comment-link"><span class="fb-comments-count" data-href="http://40pk.github.io/2018/05/14/Как-сделать-поисковой-микросервис/">0</span>&nbsp;Комментарии</a>
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2018/05/16/11-лучших-шрифтов-для-программирования/" id="article-nav-newer" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Новые</strong>
+            <div class="article-nav-title">
+                
+                    11 лучших шрифтов для программирования
+                
+            </div>
+        </a>
+    
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+    <div class="fb-comments" data-width="100%" data-href="http://40pk.github.io/2018/05/14/Как-сделать-поисковой-микросервис/" data-num-posts="5"></div>
+
+</section>
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">недавние</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/08/14/2-PROграммист-Структуры-данных-Queue-очередь/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/images/PROgrammer-Queue_banner.jpg)" alt="1.2. PROграммист. Структуры данных - Queue (очередь)" class="thumbnail-image"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/Статьи/">Статьи</a></p>
+                            <p class="item-title"><a href="/2018/08/14/2-PROграммист-Структуры-данных-Queue-очередь/" class="title">1.2. PROграммист. Структуры данных - Queue (очередь)</a></p>
+                            <p class="item-date"><time datetime="2018-08-14T10:46:33.000Z" itemprop="datePublished">2018-08-14</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/08/07/1-PROграммист-Структуры-данных-Stack-стек/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/images/PROgrammer-Stack_banner.png)" alt="1.1. PROграммист. Структуры данных - Stack (стек)" class="thumbnail-image"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/Статьи/">Статьи</a></p>
+                            <p class="item-title"><a href="/2018/08/07/1-PROграммист-Структуры-данных-Stack-стек/" class="title">1.1. PROграммист. Структуры данных - Stack (стек)</a></p>
+                            <p class="item-date"><time datetime="2018-08-07T08:33:58.000Z" itemprop="datePublished">2018-08-07</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/05/30/Wired-Elements/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/images/wired_elements.png)" alt="Wired Elements" class="thumbnail-image"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/Проекты/">Проекты</a></p>
+                            <p class="item-title"><a href="/2018/05/30/Wired-Elements/" class="title">Wired Elements</a></p>
+                            <p class="item-date"><time datetime="2018-05-30T14:45:56.000Z" itemprop="datePublished">2018-05-30</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/05/27/Vuido/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/images/vuido.png)" alt="Vuido" class="thumbnail-image"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/Проекты/">Проекты</a></p>
+                            <p class="item-title"><a href="/2018/05/27/Vuido/" class="title">Vuido</a></p>
+                            <p class="item-date"><time datetime="2018-05-27T16:17:34.000Z" itemprop="datePublished">2018-05-27</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2018/05/16/ClassicKit/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/images/classickit.png)" alt="ClassicKit" class="thumbnail-image"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/Проекты/">Проекты</a></p>
+                            <p class="item-title"><a href="/2018/05/16/ClassicKit/" class="title">ClassicKit</a></p>
+                            <p class="item-date"><time datetime="2018-05-16T14:41:51.000Z" itemprop="datePublished">2018-05-16</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">категории</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Проекты/">Проекты</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Статьи/">Статьи</a><span class="category-list-count">4</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">архивы</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">август 2018</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">май 2018</a><span class="archive-list-count">5</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">теги</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/API/">API</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Elasticsearch/">Elasticsearch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Golang/">Golang</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/">JavaScript</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/">Linux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NodeJS/">NodeJS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/OSX/">OSX</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/PROграммист/">PROграммист</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Queue/">Queue</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReactJS/">ReactJS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Stack/">Stack</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UI/">UI</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIKit/">UIKit</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/VueJS/">VueJS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Windows/">Windows</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS/">iOS</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/libui/">libui</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Микросервис/">Микросервис</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Очередь/">Очередь</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Перевод/">Перевод</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Программирование/">Программирование</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Стек/">Стек</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Структуры-данных/">Структуры данных</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Типографика/">Типографика</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Шрифт/">Шрифт</a><span class="tag-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">облако тегов</h3>
+        <div class="widget tagcloud">
+            <a href="/tags/API/" style="font-size: 10px;">API</a> <a href="/tags/Elasticsearch/" style="font-size: 10px;">Elasticsearch</a> <a href="/tags/Golang/" style="font-size: 10px;">Golang</a> <a href="/tags/JavaScript/" style="font-size: 20px;">JavaScript</a> <a href="/tags/Linux/" style="font-size: 10px;">Linux</a> <a href="/tags/NodeJS/" style="font-size: 10px;">NodeJS</a> <a href="/tags/OSX/" style="font-size: 10px;">OSX</a> <a href="/tags/PROграммист/" style="font-size: 20px;">PROграммист</a> <a href="/tags/Queue/" style="font-size: 10px;">Queue</a> <a href="/tags/ReactJS/" style="font-size: 10px;">ReactJS</a> <a href="/tags/Stack/" style="font-size: 10px;">Stack</a> <a href="/tags/UI/" style="font-size: 10px;">UI</a> <a href="/tags/UIKit/" style="font-size: 10px;">UIKit</a> <a href="/tags/VueJS/" style="font-size: 10px;">VueJS</a> <a href="/tags/Windows/" style="font-size: 10px;">Windows</a> <a href="/tags/iOS/" style="font-size: 10px;">iOS</a> <a href="/tags/libui/" style="font-size: 10px;">libui</a> <a href="/tags/Микросервис/" style="font-size: 10px;">Микросервис</a> <a href="/tags/Очередь/" style="font-size: 10px;">Очередь</a> <a href="/tags/Перевод/" style="font-size: 20px;">Перевод</a> <a href="/tags/Программирование/" style="font-size: 10px;">Программирование</a> <a href="/tags/Стек/" style="font-size: 10px;">Стек</a> <a href="/tags/Структуры-данных/" style="font-size: 20px;">Структуры данных</a> <a href="/tags/Типографика/" style="font-size: 10px;">Типографика</a> <a href="/tags/Шрифт/" style="font-size: 10px;">Шрифт</a>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">ссылки</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a href="http://t.me/fortypk">Telegram</a>
+                    </li>
+                
+                    <li>
+                        <a href="https://twitter.com/fortypk">Twitter</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2018 Ilya Perkovec<br>
+            Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a>
+        </div>
+    </div>
+</footer>
+        
+    
+<script>(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/ru/sdk.js#xfbml=1&version=v2.8";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+    
+        <script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-share.min.js"></script>
+        <script src="/libs/lightgallery/js/lg-video.min.js"></script>
+    
+    
+        <script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
